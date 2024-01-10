@@ -114,6 +114,7 @@ class Serializer {
   inline static const std::string DATA_KEY = "data";
   inline static const std::string HASH_KEY = "hash";
   inline static const std::string PRIORITY_KEY = "priority";
+  inline static const std::string TRACEPARENT_KEY = "traceparent";
 
   inline static const std::string CONTENT_TYPE = "application/x-protobuf";
   inline static const std::string PROTO_CONTENT_TYPE =
@@ -205,6 +206,8 @@ class Serializer {
             {Serializer::REQ_ID_KEY,
              CloudEvent_CloudEventAttributeValue::AttrCase::kCeString},
             {Serializer::DATA_SCHEMA_KEY,
+             CloudEvent_CloudEventAttributeValue::AttrCase::kCeString},
+            {Serializer::TRACEPARENT_KEY,
              CloudEvent_CloudEventAttributeValue::AttrCase::kCeString}}}};
 
   [[nodiscard]] static std::string attr_case_string(

@@ -37,7 +37,7 @@ namespace cloudevents::format {
 class UAttributes {
  public:
   UAttributes(const std::string_view& hash, Priority::Priority_E priority,
-                int32_t ttl) {
+                int32_t ttl, const std::string_view& traceparent) {
     if (unlikely(hash.empty())) {
       this->hash.clear();
     } else {
@@ -53,17 +53,23 @@ class UAttributes {
     } else {
       this->ttl = ttl;
     }
+    if (unlikely(traceparent.empty())) {
+      this->traceparent.clear();
+    } else {
+      this->traceparent = traceparent;
+    }   
   }
 
   UAttributes() {
     this->hash.clear();
     this->priority.clear();
+    this->traceparent.clear();
   }
 
   static UAttributes empty() { return {}; }
 
   [[nodiscard]] bool isEmpty() const {
-    if (hash.empty() && priority.empty() && ttl == -1) {
+    if (hash.empty() && priority.empty() && ttl == -1 && traceparent.empty()) {
       return true;
     }
     return false;
@@ -87,6 +93,10 @@ class UAttributes {
     return ttl == -1 ? std::nullopt : std::make_optional(ttl);
   }
 
+  std::optional<std::string> get_traceparent() {
+    return traceparent.empty() ? std::nullopt : std::make_optional(traceparent);
+  }
+
   UAttributes* WithHash(const std::string_view& m_hash) {
     this->hash = m_hash;
     return this;
@@ -103,11 +113,17 @@ class UAttributes {
     return this;
   }
 
- private:
-  std::string hash;
-  std::string priority;
-  int32_t ttl = -1;
-};
+  UAttributes* WithTraceparent(const std::string_view& m_traceparent) {
+    this->traceparent = m_traceparent;
+    return this;
+  }
+
+  private:
+    std::string hash;
+    std::string priority;
+    int32_t ttl = -1;
+    std::string traceparent;
+  };
 
 }  // namespace cloudevents::format
 #endif  // CPP_COULDEVENT_ATTRIBUTES_H_

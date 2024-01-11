@@ -48,9 +48,14 @@ static void createCloudEvent() {
       io::cloudevents::v1::CloudEvent_CloudEventAttributeValue>();
   attr2->set_ce_integer(88);
   (*cloudEvent.mutable_attributes())["ttl"] = *attr2;
+  auto attr3 = std::unique_ptr<
+      io::cloudevents::v1::CloudEvent_CloudEventAttributeValue>();
+  std::string str3 = "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01";
+  attr3->set_ce_string(str3);
+  (*cloudEvent.mutable_attributes())["traceparent"] = *attr3;
 }
 
-static void createBedCloudEvent() {
+static void createBadCloudEvent() {
   cloudEvent.set_type("req.v1");
   cloudEvent.set_id("id 88");
   cloudEvent.set_spec_version("v1");
@@ -96,6 +101,11 @@ Ensure(JsonSerializer, validEvent) {
                io::cloudevents::v1::CloudEvent_CloudEventAttributeValue::
                    AttrCase::kCeInteger);
   assert_equal(tstRes.ce_integer(), 88);
+  auto tstRes3 = (*cloudEvent.mutable_attributes())["traceparent"];
+  assert_false(tstRes3.has_ce_boolean());
+  assert_true(tstRes3.has_ce_string());
+  assert_true(tstRes3.ce_string() == "00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01");
+  
 
   assert_true(res);
 }
@@ -116,12 +126,12 @@ Ensure(JsonSerializer, NotValidEvent_1) {
 Ensure(JsonSerializer, bad_serialize) {
   auto json_serializer =
       std::make_unique<cloudevents::format::Json_serializer>();
-  createBedCloudEvent();
+  createBadCloudEvent();
   auto res = json_serializer->is_valid_event(cloudEvent);
   assert_false(res);
 }
 
-Ensure(JsonSerializer, serielize) {
+Ensure(JsonSerializer, serialize) {
   auto json_serializer =
       std::make_unique<cloudevents::format::Json_serializer>();
   auto res = json_serializer->serialize(cloudEvent);
@@ -152,7 +162,7 @@ Ensure(JsonSerializer, bad_ttl) {
 
 int main([[maybe_unused]] int argc, [[maybe_unused]] char** argv) {
   TestSuite* suite = create_test_suite();
-  add_test_with_context(suite, JsonSerializer, serielize);
+  add_test_with_context(suite, JsonSerializer, serialize);
   add_test_with_context(suite, JsonSerializer, validEvent);
   add_test_with_context(suite, JsonSerializer, NotValidEvent_1);
   add_test_with_context(suite, JsonSerializer, bad_serialize);
